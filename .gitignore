@@ -4,3 +4,6 @@ archive.zip/
 genres_original/
 previous frontend/
 __pycache__/
+# ML models
+*.h5
+*.keras
