@@ -1,0 +1,6 @@
+archive.zip/
+.venv/
+.ipynb_checkpoints/
+genres_original/
+previous frontend/
+__pycache__/

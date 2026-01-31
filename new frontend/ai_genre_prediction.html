@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Genre Prediction - Music Genre AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    // Apply saved theme on page load
+    if (localStorage.getItem("theme") === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+</script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#5b13ec",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#161022",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            html {
+                transition: background-color 0.5s ease, color 0.5s ease;
+            }
+        }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .dark .glass-nav {
+            background: rgba(22, 16, 34, 0.8);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .mesh-gradient {
+            background-color: #f6f6f8;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(91, 19, 236, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(91, 19, 236, 0.05) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(139, 92, 246, 0.08) 0px, transparent 50%);
+        }
+        .dark .mesh-gradient {
+            background-color: #161022;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(91, 19, 236, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.1) 0px, transparent 50%);
+        }
+        .theme-toggle-btn .sun-icon { display: block; }
+        .theme-toggle-btn .moon-icon { display: none; }
+        .dark .theme-toggle-btn .sun-icon { display: none; }
+        .dark .theme-toggle-btn .moon-icon { display: block; }
+        .drop-zone {
+            border: 2px dashed rgba(91, 19, 236, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .drop-zone:hover {
+            border-color: #5b13ec;
+            background: rgba(91, 19, 236, 0.02);
+            transform: translateY(-2px);
+        }
+        .dark .drop-zone:hover {
+            background: rgba(91, 19, 236, 0.05);
+        }
+        .waveform-bar {
+            background: #5b13ec;
+            border-radius: 999px;
+            width: 3px;
+            transition: height 0.2s ease;
+        }
+        .dark .waveform-bar {
+            background: #8b5cf6;
+        }
+        .drop-zone.drag-active {
+            border-color: #5b13ec;
+            background: rgba(91, 19, 236, 0.08);
+            transform: translateY(-2px) scale(1.02);
+        }
+        @keyframes pulse-success {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .processing-pulse {
+            animation: pulse-success 1.5s ease-in-out infinite;
+        }
+        .theme-toggle-icon {
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#120d1b] dark:text-white transition-colors duration-300">
+<nav class="fixed top-0 left-0 right-0 z-50 glass-nav">
+<div class="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="text-primary">
+<span class="material-symbols-outlined text-3xl">graphic_eq</span>
+</div>
+<h1 class="text-xl font-bold tracking-tight">GenreAI</h1>
+</div>
+<div class="hidden md:flex items-center gap-10">
+<a class="text-sm font-medium hover:text-primary transition-colors" href="home.html">Home</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="about_project.html">About Project</a>
+<a class="text-sm font-medium text-primary" href="ai_genre_prediction.html">Model</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">GitHub</a>
+</div>
+<div class="flex items-center gap-4">
+<button
+    class="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-all overflow-hidden group"
+    onclick="toggleTheme()">
+  
+    <span class="material-symbols-outlined theme-toggle-icon absolute dark:translate-y-10 dark:opacity-0">
+      light_mode
+    </span>
+    <span class="material-symbols-outlined theme-toggle-icon absolute translate-y-10 opacity-0 dark:translate-y-0 dark:opacity-100">
+      dark_mode
+    </span>
+</button>
+
+<a href="ai_genre_prediction.html">
+<button class="bg-primary text-white px-5 py-2 rounded-lg text-sm font-bold hover:shadow-lg hover:shadow-primary/20 transition-all">
+                Try Prediction
+            </button>
+</a>
+</div>
+</div>
+</nav>
+<main class="mesh-gradient pt-16 min-h-screen">
+<section class="max-w-[1200px] mx-auto px-6 py-12 lg:py-24">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+<div class="flex flex-col gap-8 order-2 lg:order-1">
+<div class="space-y-4 text-center lg:text-left">
+<span class="inline-block px-3 py-1 bg-primary/10 text-primary text-xs font-bold tracking-widest uppercase rounded-full">
+                        Powered by Deep Learning
+                    </span>
+<h1 class="text-5xl lg:text-7xl font-bold leading-[1.1] tracking-tight text-[#120d1b] dark:text-white">
+                        Analyze Music <br/>
+<span class="text-primary">Instantly</span> <br/>
+                        with Neural Nets
+                    </h1>
+<p class="text-lg text-[#120d1b]/70 dark:text-white/70 max-w-[500px] leading-relaxed mx-auto lg:mx-0">
+                        High-performance genre classification for power users. Drop your tracks and get sub-second analysis of Jazz, Rock, or Electronic signatures.
+                    </p>
+</div>
+<div class="flex flex-wrap gap-4 justify-center lg:justify-start">
+<button class="flex items-center gap-2 border-2 border-primary/20 text-[#120d1b] dark:text-white px-8 py-4 rounded-xl text-base font-bold hover:bg-primary/5 transition-all">
+<span class="material-symbols-outlined text-xl">description</span>
+                        Read Documentation
+                    </button>
+<div class="flex items-center gap-3 px-4 py-2 bg-primary/5 rounded-lg">
+<span class="flex h-2 w-2 rounded-full bg-green-500"></span>
+<span class="text-sm font-medium opacity-60">System Ready</span>
+</div>
+</div>
+</div>
+<div class="relative order-1 lg:order-2 flex justify-center items-center">
+<div class="w-full relative group">
+<div class="absolute inset-0 bg-primary/10 blur-[120px] rounded-full group-hover:bg-primary/20 transition-all duration-500"></div>
+<div class="relative w-full rounded-3xl overflow-hidden shadow-2xl bg-white/90 dark:bg-[#1f1631]/95 backdrop-blur-xl border border-primary/10 flex flex-col min-h-[500px]">
+<div class="p-8 border-b border-primary/5 flex justify-between items-end">
+<div>
+<h3 class="text-2xl font-bold mb-1">Advanced Analyzer</h3>
+<p class="text-sm text-[#120d1b]/60 dark:text-white/60">Supports multi-channel 32-bit audio files</p>
+</div>
+<div class="text-right">
+<span class="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded">V2.4 ENGINE</span>
+</div>
+</div>
+<!-- Hidden file input -->
+<input type="file" id="audioFileInput" accept=".mp3,.wav,.ogg,audio/mpeg,audio/wav,audio/ogg" style="display: none;">
+<div id="dropZone" class="flex-1 drop-zone m-4 rounded-2xl flex flex-col items-center justify-center text-center p-8 cursor-pointer relative overflow-hidden group/zone">
+<div class="absolute inset-x-0 bottom-0 h-48 flex items-end justify-center gap-1 px-8 opacity-20 pointer-events-none group-hover/zone:opacity-40 transition-opacity">
+<div class="waveform-bar h-[20%]"></div><div class="waveform-bar h-[45%]"></div><div class="waveform-bar h-[30%]"></div><div class="waveform-bar h-[65%]"></div><div class="waveform-bar h-[40%]"></div><div class="waveform-bar h-[85%]"></div><div class="waveform-bar h-[55%]"></div><div class="waveform-bar h-[90%]"></div><div class="waveform-bar h-[60%]"></div><div class="waveform-bar h-[75%]"></div><div class="waveform-bar h-[50%]"></div><div class="waveform-bar h-[80%]"></div><div class="waveform-bar h-[40%]"></div><div class="waveform-bar h-[70%]"></div><div class="waveform-bar h-[30%]"></div><div class="waveform-bar h-[55%]"></div><div class="waveform-bar h-[25%]"></div><div class="waveform-bar h-[60%]"></div><div class="waveform-bar h-[40%]"></div><div class="waveform-bar h-[85%]"></div><div class="waveform-bar h-[55%]"></div><div class="waveform-bar h-[90%]"></div><div class="waveform-bar h-[60%]"></div><div class="waveform-bar h-[75%]"></div><div class="waveform-bar h-[50%]"></div><div class="waveform-bar h-[80%]"></div><div class="waveform-bar h-[40%]"></div><div class="waveform-bar h-[70%]"></div><div class="waveform-bar h-[30%]"></div><div class="waveform-bar h-[55%]"></div>
+</div>
+<div class="relative z-10 flex flex-col items-center">
+<div class="size-24 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover/zone:scale-110 transition-transform duration-500 shadow-inner">
+<span class="material-symbols-outlined text-5xl">graphic_eq</span>
+</div>
+<div class="space-y-3">
+<h4 id="dropZoneTitle" class="font-bold text-2xl tracking-tight">Drag to Analyze</h4>
+<p id="dropZoneSubtitle" class="text-base text-[#120d1b]/50 dark:text-white/50 max-w-[240px] mx-auto">Upload lossless WAV or MP3 for highest classification precision</p>
+</div>
+<div class="mt-10">
+<button id="browseBtn" class="flex items-center gap-2 text-sm font-bold text-[#120d1b]/40 dark:text-white/40 hover:text-primary transition-colors group/btn">
+<span class="material-symbols-outlined text-lg">attachment</span>
+<span>Or <span class="underline decoration-2 underline-offset-4 group-hover/btn:text-primary">Browse Files</span></span>
+</button>
+</div>
+</div>
+</div>
+<div class="p-6 bg-black/5 dark:bg-white/5 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-lg">bolt</span>
+</div>
+<div>
+<p class="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/80">Processing Status</p>
+<p id="statusMessage" class="text-xs font-medium">Listening for input...</p>
+</div>
+</div>
+<div class="flex -space-x-2">
+<div class="size-6 rounded-full border-2 border-white dark:border-[#1f1631] bg-primary/40"></div>
+<div class="size-6 rounded-full border-2 border-white dark:border-[#1f1631] bg-primary/60"></div>
+<div class="size-6 rounded-full border-2 border-white dark:border-[#1f1631] bg-primary/80"></div>
+</div>
+</div>
+<!-- Results Container (Hidden by default) -->
+<div id="resultsContainer" class="hidden border-t border-primary/10 p-6 bg-gradient-to-br from-primary/5 to-transparent">
+<div class="flex items-start gap-4">
+<div class="size-12 rounded-xl bg-primary/20 flex items-center justify-center text-primary flex-shrink-0">
+<span class="material-symbols-outlined text-2xl">music_note</span>
+</div>
+<div class="flex-1">
+<h4 class="text-lg font-bold mb-3 flex items-center gap-2">
+<span>Analysis Complete</span>
+<span class="material-symbols-outlined text-green-500 text-xl">check_circle</span>
+</h4>
+<div class="grid grid-cols-2 gap-3">
+<div class="bg-white/50 dark:bg-white/5 rounded-lg p-3">
+<p class="text-[10px] font-bold uppercase tracking-wider text-[#120d1b]/60 dark:text-white/60 mb-1">Predicted Genre</p>
+<p id="resultGenre" class="text-xl font-bold text-primary">-</p>
+</div>
+<div class="bg-white/50 dark:bg-white/5 rounded-lg p-3">
+<p class="text-[10px] font-bold uppercase tracking-wider text-[#120d1b]/60 dark:text-white/60 mb-1">Confidence</p>
+<p id="resultConfidence" class="text-xl font-bold">-</p>
+</div>
+</div>
+<div id="additionalGenres" class="mt-3 hidden">
+<p class="text-[10px] font-bold uppercase tracking-wider text-[#120d1b]/60 dark:text-white/60 mb-2">Alternative Predictions</p>
+<div id="additionalGenresList" class="flex flex-wrap gap-2"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="max-w-[1200px] mx-auto px-6 pb-20">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-white/50 dark:bg-white/5 backdrop-blur-sm p-8 rounded-2xl border border-white dark:border-white/10 flex flex-col gap-3 group hover:border-primary/30 transition-colors">
+<span class="material-symbols-outlined text-primary text-3xl">verified</span>
+<div>
+<p class="text-sm font-medium text-[#120d1b]/60 dark:text-white/60">Model Accuracy</p>
+<p class="text-3xl font-bold">92.4%</p>
+</div>
+</div>
+<div class="bg-white/50 dark:bg-white/5 backdrop-blur-sm p-8 rounded-2xl border border-white dark:border-white/10 flex flex-col gap-3 group hover:border-primary/30 transition-colors">
+<span class="material-symbols-outlined text-primary text-3xl">database</span>
+<div>
+<p class="text-sm font-medium text-[#120d1b]/60 dark:text-white/60">Training Data</p>
+<p class="text-3xl font-bold">GTZAN Dataset</p>
+</div>
+</div>
+<div class="bg-white/50 dark:bg-white/5 backdrop-blur-sm p-8 rounded-2xl border border-white dark:border-white/10 flex flex-col gap-3 group hover:border-primary/30 transition-colors">
+<span class="material-symbols-outlined text-primary text-3xl">memory</span>
+<div>
+<p class="text-sm font-medium text-[#120d1b]/60 dark:text-white/60">Architecture</p>
+<p class="text-3xl font-bold">CNN (ResNet)</p>
+</div>
+</div>
+</div>
+</section>
+<section class="bg-white/40 dark:bg-black/20 py-24">
+<div class="max-w-[1200px] mx-auto px-6">
+<div class="mb-16">
+<h2 class="text-4xl font-bold mb-4">Project Methodology</h2>
+<p class="text-[#120d1b]/70 dark:text-white/70 max-w-2xl leading-relaxed">
+                    Our approach combines advanced signal processing with state-of-the-art convolutional neural networks to achieve industry-leading classification results.
+                </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="group p-8 rounded-2xl bg-white dark:bg-background-dark border border-primary/10 hover:border-primary transition-all shadow-sm">
+<div class="size-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-6">
+<span class="material-symbols-outlined">waves</span>
+</div>
+<h3 class="text-xl font-bold mb-3">Spectrogram Analysis</h3>
+<p class="text-sm text-[#120d1b]/60 dark:text-white/60 leading-relaxed">
+                        Converting raw audio into visual frequency representations (Mel-spectrograms) for deep learning processing.
+                    </p>
+</div>
+<div class="group p-8 rounded-2xl bg-white dark:bg-background-dark border border-primary/10 hover:border-primary transition-all shadow-sm">
+<div class="size-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-6">
+<span class="material-symbols-outlined">tune</span>
+</div>
+<h3 class="text-xl font-bold mb-3">Feature Extraction</h3>
+<p class="text-sm text-[#120d1b]/60 dark:text-white/60 leading-relaxed">
+                        Extracting MFCCs and chroma features to capture the unique sonic signature of each musical genre.
+                    </p>
+</div>
+<div class="group p-8 rounded-2xl bg-white dark:bg-background-dark border border-primary/10 hover:border-primary transition-all shadow-sm">
+<div class="size-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-6">
+<span class="material-symbols-outlined">bolt</span>
+</div>
+<h3 class="text-xl font-bold mb-3">Real-time Inference</h3>
+<p class="text-sm text-[#120d1b]/60 dark:text-white/60 leading-relaxed">
+                        Optimized model weights allow for near-instant classification of uploaded MP3 or WAV audio files.
+                    </p>
+</div>
+</div>
+</div>
+</section>
+<footer class="max-w-[1200px] mx-auto px-6 py-12 border-t border-primary/10">
+<div class="flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">graphic_eq</span>
+<span class="font-bold">GenreAI Project</span>
+</div>
+<p class="text-sm text-[#120d1b]/50 dark:text-white/50">
+                © 2024 AI Research Group. All rights reserved.
+            </p>
+<div class="flex gap-6">
+<a class="text-sm text-[#120d1b]/70 dark:text-white/70 hover:text-primary" href="#">Docs</a>
+<a class="text-sm text-[#120d1b]/70 dark:text-white/70 hover:text-primary" href="#">Privacy</a>
+<a class="text-sm text-[#120d1b]/70 dark:text-white/70 hover:text-primary" href="#">Contact</a>
+</div>
+</div>
+</footer>
+</main>
+
+<!-- ======================================================================================== -->
+<!-- BACKEND INTEGRATION JAVASCRIPT -->
+<!-- ======================================================================================== -->
+<script>
+(function() {
+    'use strict';
+    
+    // ==================== CONFIGURATION ====================
+    const CONFIG = {
+        BACKEND_URL: 'http://127.0.0.1:8000/predict',
+        MAX_FILE_SIZE: 100*1024*1024, // 100MB
+        ALLOWED_EXTENSIONS: ['.mp3', '.wav', '.ogg'],
+        ALLOWED_MIME_TYPES: ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp3']
+    };
+    
+    // ==================== DOM ELEMENTS ====================
+    const elements = {
+        fileInput: document.getElementById('audioFileInput'),
+        dropZone: document.getElementById('dropZone'),
+        browseBtn: document.getElementById('browseBtn'),
+        dropZoneTitle: document.getElementById('dropZoneTitle'),
+        dropZoneSubtitle: document.getElementById('dropZoneSubtitle'),
+        statusMessage: document.getElementById('statusMessage'),
+        resultsContainer: document.getElementById('resultsContainer'),
+        resultGenre: document.getElementById('resultGenre'),
+        resultConfidence: document.getElementById('resultConfidence'),
+        additionalGenres: document.getElementById('additionalGenres'),
+        additionalGenresList: document.getElementById('additionalGenresList')
+    };
+    
+    // ==================== STATE ====================
+    let selectedFile = null;
+    let isProcessing = false;
+    
+    // ==================== INITIALIZATION ====================
+    function init() {
+        setupEventListeners();
+    }
+    
+    // ==================== EVENT LISTENERS ====================
+    function setupEventListeners() {
+        // Browse button click
+        elements.browseBtn.addEventListener('click', handleBrowseClick);
+        
+        // Drop zone click
+        elements.dropZone.addEventListener('click', handleDropZoneClick);
+        
+        // File input change
+        elements.fileInput.addEventListener('change', handleFileInputChange);
+        
+        // Drag and drop events
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            elements.dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        elements.dropZone.addEventListener('dragenter', handleDragEnter);
+        elements.dropZone.addEventListener('dragover', handleDragOver);
+        elements.dropZone.addEventListener('dragleave', handleDragLeave);
+        elements.dropZone.addEventListener('drop', handleDrop);
+    }
+    
+    // ==================== EVENT HANDLERS ====================
+    function handleBrowseClick(e) {
+        e.stopPropagation();
+        elements.fileInput.click();
+    }
+    
+    function handleDropZoneClick(e) {
+        if (e.target === elements.browseBtn || elements.browseBtn.contains(e.target)) {
+            return;
+        }
+        elements.fileInput.click();
+    }
+    
+    function handleFileInputChange(e) {
+        const file = e.target.files[0];
+        if (file) {
+            processFile(file);
+        }
+    }
+    
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    function handleDragEnter(e) {
+        elements.dropZone.classList.add('drag-active');
+    }
+    
+    function handleDragOver(e) {
+        elements.dropZone.classList.add('drag-active');
+    }
+    
+    function handleDragLeave(e) {
+        if (e.target === elements.dropZone) {
+            elements.dropZone.classList.remove('drag-active');
+        }
+    }
+    
+    function handleDrop(e) {
+        elements.dropZone.classList.remove('drag-active');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            processFile(files[0]);
+        }
+    }
+    
+    // ==================== FILE PROCESSING ====================
+    function processFile(file) {
+        // Validate file
+        const validation = validateFile(file);
+        if (!validation.valid) {
+            showError(validation.message);
+            return;
+        }
+        
+        // Store file
+        selectedFile = file;
+        
+        // Update UI
+        updateUIForFileSelected(file);
+        
+        // Start prediction
+        predictGenre();
+    }
+    
+    function validateFile(file) {
+        // Check file extension
+        const fileName = file.name.toLowerCase();
+        const hasValidExtension = CONFIG.ALLOWED_EXTENSIONS.some(ext => fileName.endsWith(ext));
+        
+        if (!hasValidExtension && !CONFIG.ALLOWED_MIME_TYPES.includes(file.type)) {
+            return {
+                valid: false,
+                message: 'Invalid file type. Please upload MP3, WAV, or OGG files.'
+            };
+        }
+        
+        // Check file size
+        if (file.size > CONFIG.MAX_FILE_SIZE) {
+            return {
+                valid: false,
+                message: `File too large. Maximum size is ${CONFIG.MAX_FILE_SIZE / 1024 / 1024}MB.`
+            };
+        }
+        
+        return { valid: true };
+    }
+    
+    function updateUIForFileSelected(file) {
+        elements.dropZoneTitle.textContent = file.name;
+        elements.dropZoneSubtitle.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB - Ready to analyze`;
+        elements.statusMessage.textContent = 'File loaded, preparing analysis...';
+        elements.resultsContainer.classList.add('hidden');
+    }
+    
+    // ==================== PREDICTION ====================
+    async function predictGenre() {
+        if (!selectedFile || isProcessing) {
+            return;
+        }
+        
+        isProcessing = true;
+        updateUIForProcessing();
+        
+        try {
+            // Create FormData
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            
+            // Send request
+            const response = await fetch(CONFIG.BACKEND_URL, {
+                method: 'POST',
+                body: formData
+            });
+            
+            // Check response status
+            if (!response.ok) {
+                const errorText = await response.text().catch(() => 'Unknown error');
+                throw new Error(`Server error (${response.status}): ${errorText}`);
+            }
+            
+            // Parse JSON
+            const data = await response.json();
+            
+            // Display results
+            displayResults(data);
+            
+        } catch (error) {
+            console.error('Prediction error:', error);
+            handlePredictionError(error);
+        } finally {
+            isProcessing = false;
+        }
+    }
+    
+    function updateUIForProcessing() {
+        elements.statusMessage.textContent = 'Analyzing audio patterns...';
+        elements.statusMessage.classList.add('processing-pulse');
+        elements.resultsContainer.classList.add('hidden');
+    }
+    
+    // ==================== RESULTS DISPLAY ====================
+    function displayResults(data) {
+        // Debug: log the actual response
+        console.log('==== BACKEND RESPONSE DEBUG ====');
+        console.log('Full response object:', data);
+        console.log('Response JSON:', JSON.stringify(data, null, 2));
+        console.log('================================');
+        
+        // Remove processing indicator
+        elements.statusMessage.classList.remove('processing-pulse');
+        elements.statusMessage.textContent = 'Analysis complete!';
+        
+        // Extract data based on YOUR backend's response structure
+        let genre = null;
+        let confidence = null;
+        let allPredictions = null;
+        
+        // Your backend returns: { status, file_id, analysis: { primary_genre, confidence, all_predictions } }
+        if (data.analysis) {
+            // Extract from analysis object
+            genre = data.analysis.primary_genre || data.analysis.predicted_genre || data.analysis.genre;
+            confidence = data.analysis.confidence || data.analysis.probability;
+            allPredictions = data.analysis.all_predictions;
+            console.log('✓ Extracted from analysis object:', { genre, confidence });
+        } else {
+            // Fallback: try root level fields
+            genre = data.predicted_genre || data.genre || data.primary_genre || data.prediction;
+            confidence = data.confidence || data.probability || data.score;
+            allPredictions = data.predictions || data.all_predictions;
+            console.log('✓ Extracted from root level:', { genre, confidence });
+        }
+        
+        // Final fallback
+        if (!genre) {
+            genre = 'Unknown';
+            console.warn('⚠️ Could not find genre in response');
+        }
+        
+        if (confidence === null || confidence === undefined) {
+            confidence = 0;
+            console.warn('⚠️ Could not find confidence in response');
+        }
+        
+        // Format and display main results
+        elements.resultGenre.textContent = capitalizeGenre(genre);
+        elements.resultConfidence.textContent = formatConfidence(confidence);
+        
+        // Update file info
+        elements.dropZoneSubtitle.textContent = `Analysis complete for: ${selectedFile.name}`;
+        
+        // Handle additional genres/predictions
+        if (allPredictions && typeof allPredictions === 'object') {
+            displayAdditionalGenres(allPredictions, genre);
+        } else {
+            elements.additionalGenres.classList.add('hidden');
+        }
+        
+        // Show results with animation
+        elements.resultsContainer.classList.remove('hidden');
+        setTimeout(() => {
+            elements.resultsContainer.style.opacity = '0';
+            elements.resultsContainer.style.transform = 'translateY(10px)';
+            setTimeout(() => {
+                elements.resultsContainer.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                elements.resultsContainer.style.opacity = '1';
+                elements.resultsContainer.style.transform = 'translateY(0)';
+            }, 10);
+        }, 50);
+    }
+    
+    function displayAdditionalGenres(predictions, mainGenre) {
+        if (!predictions || typeof predictions !== 'object') {
+            return;
+        }
+        
+        // Convert to array if it's an object
+        let predictionArray = [];
+        if (Array.isArray(predictions)) {
+            predictionArray = predictions;
+        } else {
+            predictionArray = Object.entries(predictions).map(([genre, prob]) => ({
+                genre: genre,
+                confidence: prob
+            }));
+        }
+        
+        // Filter out main genre and sort by confidence
+        const alternatives = predictionArray
+            .filter(p => {
+                const pGenre = p.genre || p.predicted_genre || '';
+                return pGenre.toLowerCase() !== mainGenre.toLowerCase();
+            })
+            .sort((a, b) => (b.confidence || b.probability || 0) - (a.confidence || a.probability || 0))
+            .slice(0, 3); // Top 3 alternatives
+        
+        if (alternatives.length > 0) {
+            elements.additionalGenresList.innerHTML = '';
+            alternatives.forEach(alt => {
+                const genreName = alt.genre || alt.predicted_genre || 'Unknown';
+                const conf = alt.confidence || alt.probability || 0;
+                
+                const badge = document.createElement('span');
+                badge.className = 'inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium';
+                badge.innerHTML = `${capitalizeGenre(genreName)} <span class="opacity-60">${formatConfidence(conf)}</span>`;
+                
+                elements.additionalGenresList.appendChild(badge);
+            });
+            elements.additionalGenres.classList.remove('hidden');
+        }
+    }
+    
+    // ==================== ERROR HANDLING ====================
+    function handlePredictionError(error) {
+        let errorMessage = 'Prediction failed. ';
+        
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            errorMessage += 'Cannot connect to backend server. Please ensure FastAPI is running on http://127.0.0.1:8000';
+        } else if (error.message.includes('Server error')) {
+            errorMessage += error.message;
+        } else {
+            errorMessage += error.message || 'Unknown error occurred.';
+        }
+        
+        showError(errorMessage);
+    }
+    
+    function showError(message) {
+        elements.statusMessage.textContent = message;
+        elements.statusMessage.classList.remove('processing-pulse');
+        elements.resultsContainer.classList.add('hidden');
+        
+        // Reset UI after delay
+        setTimeout(() => {
+            resetUI();
+        }, 5000);
+    }
+    
+    function resetUI() {
+        elements.dropZoneTitle.textContent = 'Drag to Analyze';
+        elements.dropZoneSubtitle.textContent = 'Upload lossless WAV or MP3 for highest classification precision';
+        elements.statusMessage.textContent = 'Listening for input...';
+        selectedFile = null;
+        elements.fileInput.value = '';
+    }
+    
+    // ==================== UTILITY FUNCTIONS ====================
+    function capitalizeGenre(genre) {
+        if (!genre) return 'Unknown';
+        return genre.charAt(0).toUpperCase() + genre.slice(1).toLowerCase();
+    }
+    
+    function formatConfidence(confidence) {
+        if (typeof confidence === 'number') {
+            return `${(confidence * 100).toFixed(1)}%`;
+        }
+        return confidence || 'N/A';
+    }
+    
+    // ==================== START ====================
+    init();
+    
+})();
+</script>
+<script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.classList.toggle("dark");
+  
+      // Save preference
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+    }
+  </script>
+</body></html>
