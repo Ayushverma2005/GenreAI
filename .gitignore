@@ -2,8 +2,10 @@ archive.zip/
 .venv/
 .ipynb_checkpoints/
 genres_original/
-previous frontend/
+previous_frontend/
 __pycache__/
 # ML models
 *.h5
 *.keras
+new_frontend/
+node_modules/
