@@ -5,9 +5,16 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "build": "echo \"Build step not required\""
   },
-  "keywords": ["music", "genre", "ai", "classification", "deep-learning"],
+  "keywords": [
+    "music",
+    "genre",
+    "ai",
+    "classification",
+    "deep-learning"
+  ],
   "author": "GenreAI",
   "license": "MIT",
   "dependencies": {
