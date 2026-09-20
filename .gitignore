@@ -1,11 +1,16 @@
-archive.zip/
-.venv/
-.ipynb_checkpoints/
-genres_original/
-previous_frontend/
-__pycache__/
+# Dataset
+ML/dataset
+
 # ML models
 *.h5
-*.keras
-new_frontend/
+
+# Node
 node_modules/
+
+# Python
+__pycache__/
+
+# Test Music
+ML/Test_Music
+
+Genre_AI Walkaround Interview.txt

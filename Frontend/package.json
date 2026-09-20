@@ -1,0 +1,28 @@
+{
+  "name": "genre-ai",
+  "version": "2.0.0",
+  "description": "GenreAI — AI-Powered Music Genre Classification",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "build": "echo \"Build step not required\""
+  },
+  "keywords": [
+    "music",
+    "genre",
+    "ai",
+    "classification",
+    "deep-learning"
+  ],
+  "author": "GenreAI",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}

@@ -1,0 +1,159 @@
+<%- include('partials/head') %>
+
+<%- include('partials/navbar') %>
+
+<!-- ==================== HERO ==================== -->
+<section class="hero">
+  <div class="hero-bg">
+    <canvas class="hero-canvas" id="particleCanvas"></canvas>
+    <div class="hero-gradient-orb orb-1"></div>
+    <div class="hero-gradient-orb orb-2"></div>
+    <div class="hero-gradient-orb orb-3"></div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-text">
+      <div class="badge">
+        <span class="material-symbols-outlined" style="font-size:14px">auto_awesome</span>
+        Powered by Deep Learning
+      </div>
+      <h1 class="hero-headline">
+        Discover<br/>
+        <span class="text-gradient">Intelligence</span><br/>
+        Behind Every Genre
+      </h1>
+      <p class="hero-sub">
+        Experience the power of neural networks to analyze audio frequencies and predict genres like Jazz, Rock, or Electronic with 92% precision.
+      </p>
+      <div class="hero-btns">
+        <a href="/dashboard" class="btn btn-primary btn-lg">
+          <span class="material-symbols-outlined">play_arrow</span>
+          Try Prediction
+        </a>
+        <a href="/features" class="btn btn-outline btn-lg">
+          <span class="material-symbols-outlined">description</span>
+          Learn More
+        </a>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="hero-visual-card">
+        <div class="hero-visual-header">
+          <div class="hero-visual-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <span class="hero-visual-tag">GENREAI v2.4</span>
+        </div>
+        <div class="hero-waveform" id="heroWaveform">
+          <!-- Waveform bars injected by JS -->
+        </div>
+        <div class="hero-visual-footer">
+          <div class="hero-visual-status">
+            <span class="status-dot"></span>
+            System Ready
+          </div>
+          <span style="font-size:12px;color:var(--text-dim)">CNN (ResNet)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== STATS ==================== -->
+<section class="section-sm">
+  <div class="stats-row">
+    <div class="glass-card stat-card reveal">
+      <div class="stat-icon">
+        <span class="material-symbols-outlined">verified</span>
+      </div>
+      <span class="stat-label">Model Accuracy</span>
+      <span class="stat-value" data-count="92.4">0%</span>
+    </div>
+    <div class="glass-card stat-card reveal">
+      <div class="stat-icon">
+        <span class="material-symbols-outlined">database</span>
+      </div>
+      <span class="stat-label">Training Data</span>
+      <span class="stat-value">GTZAN Dataset</span>
+    </div>
+    <div class="glass-card stat-card reveal">
+      <div class="stat-icon">
+        <span class="material-symbols-outlined">memory</span>
+      </div>
+      <span class="stat-label">Architecture</span>
+      <span class="stat-value">CNN (ResNet)</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== METHODOLOGY ==================== -->
+<section class="section" style="background: var(--glass-bg);">
+  <div class="container">
+    <div class="section-header reveal">
+      <h2>Project Methodology</h2>
+      <p>Our approach combines advanced signal processing with state-of-the-art convolutional neural networks to achieve industry-leading classification results.</p>
+    </div>
+    <div class="features-grid">
+      <div class="glass-card feature-card reveal">
+        <div class="feature-icon">
+          <span class="material-symbols-outlined">waves</span>
+        </div>
+        <h3>Spectrogram Analysis</h3>
+        <p>Converting raw audio into visual frequency representations (Mel-spectrograms) for deep learning processing.</p>
+      </div>
+      <div class="glass-card feature-card reveal">
+        <div class="feature-icon">
+          <span class="material-symbols-outlined">tune</span>
+        </div>
+        <h3>Feature Extraction</h3>
+        <p>Extracting MFCCs and chroma features to capture the unique sonic signature of each musical genre.</p>
+      </div>
+      <div class="glass-card feature-card reveal">
+        <div class="feature-icon">
+          <span class="material-symbols-outlined">bolt</span>
+        </div>
+        <h3>Real-time Inference</h3>
+        <p>Optimized model weights allow for near-instant classification of uploaded MP3 or WAV audio files.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== CTA ==================== -->
+<section class="section">
+  <div class="cta-section">
+    <div class="cta-card reveal">
+      <h2>Ready to classify your music?</h2>
+      <p>Upload an audio file and see our AI in action. Supports MP3, WAV, and OGG formats with instant results.</p>
+      <a href="/dashboard" class="btn btn-lg">Launch Model Now</a>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
+
+<script src="/js/particles.js"></script>
+<script>
+  // Hero waveform animation
+  (function() {
+    const container = document.getElementById('heroWaveform');
+    if (!container) return;
+    const barCount = 40;
+    for (let i = 0; i < barCount; i++) {
+      const bar = document.createElement('div');
+      bar.className = 'wave-bar';
+      bar.style.height = Math.random() * 60 + 20 + '%';
+      container.appendChild(bar);
+    }
+    function animateBars() {
+      const bars = container.querySelectorAll('.wave-bar');
+      bars.forEach(bar => {
+        bar.style.height = Math.random() * 70 + 15 + '%';
+      });
+    }
+    setInterval(animateBars, 800);
+  })();
+</script>
+</body>
+</html>
